@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>427÷1 · A pay cap game for POLS 1101</title>
+<meta name="description" content="A choice game about capping top pay at 100 times the lowest full-time worker's pay, using Home Depot as the example.">
+<link rel="icon" type="image/png" href="assets/m_relaxed.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,400..800&display=swap">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:'Martian Mono',ui-monospace,Menlo,Consolas,monospace;font-stretch:75%;color:#222;background:#2f8f55;position:relative;isolation:isolate;min-height:100vh;
+background:radial-gradient(circle at 12% 12%,#0b3b2a 0%,rgba(11,59,42,0) 55%),radial-gradient(circle at 88% 20%,#c6f25a 0%,rgba(198,242,90,0) 50%),radial-gradient(circle at 70% 88%,#7ad957 0%,rgba(122,217,87,0) 55%),radial-gradient(circle at 18% 82%,#1d7a4a 0%,rgba(29,122,74,0) 60%),#2f8f55;background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:url(assets/money.svg) repeat;pointer-events:none}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:url(assets/grain.png) repeat;mix-blend-mode:overlay;pointer-events:none}
+button{font-family:inherit;font-stretch:inherit;color:inherit}
+a{color:#222}
+#app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:72px 16px 48px;gap:14px}
+.paper{position:relative;width:100%;max-width:560px;padding:28px;background-color:#fbfaf8;background-image:linear-gradient(100deg,rgba(0,0,0,.05) 0%,rgba(255,255,255,0) 14%,rgba(255,255,255,.75) 46%,rgba(255,255,255,.35) 58%,rgba(255,255,255,0) 84%,rgba(0,0,0,.06) 100%);box-shadow:0 1px 1px rgba(0,0,0,.12),0 10px 22px rgba(0,0,0,.22);text-shadow:0 0 .3px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px}
+.paper::before{content:"";position:absolute;left:0;right:0;top:0;height:26px;background:linear-gradient(180deg,rgba(0,0,0,.09),rgba(0,0,0,0));pointer-events:none}
+.paper::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:6px;background:linear-gradient(135deg,#fbfaf8 25%,transparent 25%) -6px 0/12px 12px repeat-x,linear-gradient(225deg,#fbfaf8 25%,transparent 25%) -6px 0/12px 12px repeat-x;pointer-events:none}
+.narrow{max-width:470px}
+.wide{max-width:680px}
+.eq{display:block;overflow:hidden;white-space:nowrap;line-height:1;font-size:13px;letter-spacing:1px;color:#555;user-select:none}
+.eq::before{content:"===================================================================================================="}
+.kicker{margin:0;font-size:13px;letter-spacing:2px;color:#555}
+h1,h2,h3,p{margin:0}
+h2{font-size:26px;line-height:1.2}
+.row{display:flex;justify-content:space-between;gap:12px;font-size:15px}
+.row.big{font-size:20px;font-weight:700}
+.neg{color:#b3261e}
+.body{font-size:15px;line-height:1.6}
+.small{font-size:12px;color:#555}
+.btn{display:block;width:100%;border:none;background:#222;color:#fbfaf8;padding:15px;font-size:16px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;min-height:48px}
+.btn:focus-visible,.opt:focus-visible,.link:focus-visible,.pick:focus-visible{outline:3px solid #c6f25a;outline-offset:2px}
+.btn.ghost{background:transparent;color:#222;border:2px solid #222}
+.link{background:none;border:none;padding:6px 0;font-size:13px;text-decoration:underline;cursor:pointer;text-align:left}
+.src{align-self:flex-end;font-size:12px;color:#555;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.src button{background:none;border:none;padding:2px;font-size:12px;color:#555;text-decoration:underline;cursor:pointer}
+.opt{display:flex;justify-content:space-between;gap:12px;width:100%;text-align:left;border:2px solid #222;background:#fbfaf8;padding:12px;font-size:14px;cursor:pointer;min-height:48px;align-items:center}
+.opt.locked{border-color:#bbb;color:#6b6b6b;background:#eeeae0;cursor:not-allowed}
+.opt.locked .why{color:#b3261e}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pick{border:2px solid #222;background:#fbfaf8;padding:16px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:6px;font-size:14px;min-height:56px}
+.pick.on{background:#222;color:#fbfaf8}
+.pick .t{font-size:18px;font-weight:700}
+.chip{background:#0b3b2a;color:#fbfaf8;padding:8px 12px;font-size:13px;text-align:center;max-width:560px;width:100%}
+.stats{width:100%;max-width:600px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.stat{background:#fbfaf8;padding:8px 10px;font-size:12px;display:flex;flex-direction:column;gap:2px}
+.stat b{font-size:16px}
+.stat .bar{font-size:12px;letter-spacing:-1px}
+.wagebar{width:100%;max-width:600px;background:#0b3b2a;color:#fbfaf8;padding:8px 12px;font-size:13px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.wagebar span:last-child{color:#c6f25a}
+.scene{position:relative;width:100%;aspect-ratio:600/330;overflow:hidden}
+.scene img{position:absolute;image-rendering:pixelated}
+.scene .bg{left:0;top:0;width:100%;height:100%}
+.scene .who{left:5%;top:11.2%;width:29.3%;height:80%}
+.thought{position:absolute;left:32%;top:5%;max-width:40%;background:#fbfaf8;border:2px solid #222;padding:6px 9px;font-size:13px;line-height:1.4}
+.mute{position:fixed;top:14px;right:14px;width:48px;height:48px;background:#fbfaf8;border:2px solid #222;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;padding:0}
+.home{position:fixed;top:14px;left:14px;height:48px;background:#fbfaf8;border:2px solid #222;cursor:pointer;z-index:10;padding:0 12px;font-size:13px;font-weight:700}
+.pile{position:relative;height:150px;border-bottom:3px solid #222}
+.bill{position:absolute;width:58px;height:28px;background:#cfe8b8;border:2px solid #1d4d2e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1d4d2e;animation:fall .7s cubic-bezier(.3,.7,.4,1) both}
+.counter{position:absolute;right:0;top:0;text-align:right}
+.counter .n{font-size:40px;font-weight:700}
+.line{animation:lineIn .25s both}
+.track{height:22px;background:#e6e1d4}
+.fill{height:22px;animation:grow 1s cubic-bezier(.2,.8,.2,1) both}
+.pulse{animation:pulse 1.2s ease-in-out infinite;align-self:center;color:#fbfaf8;padding:8px 14px;font-size:15px;font-weight:700;text-align:center}
+.stamp{position:absolute;right:24px;top:110px;border:4px solid currentColor;padding:6px 12px;font-size:22px;font-weight:700;background:rgba(251,250,248,.85);animation:stamp .45s .3s both;transform:rotate(-10deg)}
+.fly{position:absolute;width:58px;height:28px;background:#cfe8b8;border:2px solid #1d4d2e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#1d4d2e;animation:flyOut .9s ease-in both;pointer-events:none}
+.shake{animation:shake .4s}
+.headline{background:#222;color:#fbfaf8;padding:24px;width:100%;max-width:560px;display:flex;flex-direction:column;gap:10px}
+.headline .q{font-size:28px;line-height:1.2;font-weight:700}
+.point{display:flex;gap:10px;font-size:15px;line-height:1.6}
+.printer{width:100%;max-width:520px;background:#1a1a1a;padding:16px 20px 0;display:flex;flex-direction:column;gap:12px;color:#c6f25a;font-size:13px;letter-spacing:2px}
+.printer .slot{height:14px;background:#000;margin:0 16px;border-top:3px solid #333}
+.led{width:10px;height:10px;display:inline-block}
+.busy{animation:jitter .08s linear 38}
+.blink{animation:blink .5s steps(2,start) infinite}
+.feedwrap{width:100%;max-width:460px;overflow:hidden;margin-top:-14px;padding-bottom:12px}
+.feed{animation:feed 3s steps(24) both}
+.rise{animation:rise .5s 3.2s both}
+.ratio{animation:ratio .5s 2.9s both}
+.sources li{margin-bottom:8px;font-size:13px;line-height:1.5}
+.sources li.hl{background:#fff3b0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@keyframes fall{0%{transform:translateY(-300px) rotate(-25deg);opacity:0}15%{opacity:1}100%{transform:translateY(0) rotate(var(--r));opacity:1}}
+@keyframes lineIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+@keyframes grow{from{width:0}}
+@keyframes stamp{0%{transform:scale(2.2) rotate(-10deg);opacity:0}60%{transform:scale(.94) rotate(-10deg);opacity:1}100%{transform:scale(1) rotate(-10deg);opacity:1}}
+@keyframes flyOut{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),-220px) rotate(var(--r));opacity:0}}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes pulse{50%{transform:scale(1.05)}}
+@keyframes jitter{0%,100%{transform:none}50%{transform:translateX(1px)}}
+@keyframes blink{to{visibility:hidden}}
+@keyframes feed{from{transform:translateY(-100%)}to{transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes ratio{0%{transform:scale(1.5);opacity:0}70%{transform:scale(.96);opacity:1}100%{transform:none}}
+@media (max-width:520px){.paper{padding:20px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}h2{font-size:22px}.thought{font-size:11px}.counter .n{font-size:30px}}
+@media (prefers-reduced-motion:reduce){*{animation:none !important}}
+</style>
+</head>
+<body>
+<button class="mute" id="mute" aria-label="Turn sound off"></button>
+<main id="app" aria-live="polite"></main>
+<script>
+(function(){
+'use strict';
+// ---------- data ----------
+var BILLS = [['Rent, Athens 1BR', 1183, 1], ['Groceries', 343, 2], ['Power', 151, 3], ['Gas, 2 tanks', 107, 4]];
+var BASE_BILLS = 1784;
+var WORLDS = {
+  today: { key: 'today', name: 'TODAY', label: 'WORLD: TODAY', wage: 15, take: 2203, ceo: '$16.2M', ratio: '519 : 1' },
+  cap: { key: 'cap', name: 'THE PAY CAP', label: 'WORLD: PAY CAP', wage: 22, take: 3118, ceo: '$4.58M', ratio: '100 : 1' }
+};
+var CHARS = {
+  m: { name: 'Marcus', pron: 'he', img: { relaxed: 'assets/m_relaxed.png', flat: 'assets/m_flat.png', frown: 'assets/m_frown.png' } },
+  f: { name: 'Alicia', pron: 'she', img: { relaxed: 'assets/f_relaxed.png', flat: 'assets/f_flat.png', frown: 'assets/f_frown.png' } }
+};
+var SOURCES = [
+  ['HUD, FY2026 Fair Market Rents, Athens-Clarke County MSA: one-bedroom $1,183.', 'https://www.huduser.gov/portal/datasets/fmr/fmr2026/FY2026_FMR_Schedule.pdf'],
+  ['USDA, Thrifty Food Plan, June 2026: adults 20 to 50, men $318.50 and women $253.40 a month. The game averages the two and adds 20% for living alone, as USDA advises for one-person households.', 'https://www.fns.usda.gov/research/cnpp/usda-food-plans/cost-food-monthly-reports'],
+  ['U.S. Energy Information Administration, 2024 average monthly residential electric bill, Georgia: $151.25.', 'https://www.eia.gov/electricity/sales_revenue_price/pdf/table_5A.pdf'],
+  ['AAA via WSB-TV, Georgia gas average, November 2026: a 15-gallon tank costs about $53.70.', 'https://www.wsbtv.com/news/local/drivers-continue-see-relief-pump-gas-prices-drop/RHIKRG2CKZGFZNQO35RC4GJAYI/'],
+  ['AAA, the average vehicle repair bill is $500 to $600.', 'https://www.ace.aaa.com/content/ace-www/en/automotive/advocacy/repair-affordability.html'],
+  ['The Home Depot, 2026 Proxy Statement (SEC Form DEF 14A): CEO total pay $16,191,127 and median associate pay $37,881 for fiscal 2025.', 'https://www.sec.gov/Archives/edgar/data/354950/000035495026000090/hd-20260406.htm'],
+  ['The Home Depot, wage update to associates, February 2023: starting wage at or above $15 an hour in every U.S. market, a $1 billion investment.', 'https://corporate.homedepot.com/news/earnings/fourth-quarter-2022-wage-update'],
+  ['Economic Policy Institute, CEO pay in 2025: CEOs earned 21 times a typical worker in 1965 and 325 times in 2025.', 'https://www.epi.org/blog/ceo-pay-surged-in-2025-ceos-are-paid-325-times-as-much-as-the-typical-worker/'],
+  ['City of Portland, Pay Ratio Surtax rule LIC-5.02: extra tax on public companies whose CEO earns 100 times their median worker or more.', 'https://www.portland.gov/policies/licensing-and-income-taxes/fees/lic-502-pay-ratio-surtax'],
+  ['OPB, May 2025: San Francisco adopted a similar pay ratio tax in 2020 that generates about $100 million a year.', 'https://www.opb.org/article/2025/05/08/portland-steve-novick-tax-the-rich/'],
+  ['Ashenfelter and Jurajda, "Wages, Minimum Wages, and Price Pass-Through: The Case of McDonald’s Restaurants," NBER Working Paper 28506: price elasticity of about 0.2, and no link between minimum wage hikes and touch-screen ordering.', 'https://www.nber.org/papers/w28506'],
+  ['The Home Depot, fiscal 2025 results: net earnings of $14.2 billion.', 'https://corporate.homedepot.com/news/earnings/home-depot-announces-fourth-quarter-2025-earnings'],
+  ['Georgia Student Finance Commission, HOPE award rates: Technical College System of Georgia tuition is $107 per credit hour, and HOPE pays 100%.', 'https://gsfc.georgia.gov/document/document/fy-2027-hope-factor-rate-chart-05192026/download'],
+  ['Georgia Department of Revenue, 2026 income tax changes: 4.99% flat rate, $15,000 standard deduction for single filers.', 'https://dor.georgia.gov/important-tax-updates'],
+  ['HUD, FY2026 annual adjustment factors: Athens-Clarke County, 1.0404 (about a 4% rent increase, or $47 on $1,183).', 'https://www.huduser.gov/portal/datasets/aaf/FY2026_Table1.pdf'],
+  ['Wang, Mehrotra and Friedman, Health Affairs (April 2021), via Penn LDI: the average urgent care visit cost $171.', 'https://ldi.upenn.edu/our-work/research-updates/urgent-care-centers-lower-cost-than-emergency-departments-but-they-increase-spending/'],
+  ['Federal Reserve, Economic Well-Being of U.S. Households in 2025: 63% of adults would cover a $400 emergency with cash or its equivalent.', 'https://www.federalreserve.gov/publications/2026-economic-well-being-of-us-households-in-2025-executive-summary.htm'],
+  ['IRS, 2026 inflation adjustments: $16,100 standard deduction for single filers, 10% bracket up to $12,400 and 12% above it.', 'https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2026-including-amendments-from-the-one-big-beautiful-bill'],
+  ['IRS Topic 751: Social Security (6.2%) and Medicare (1.45%) withholding, 7.65% total.', 'https://www.irs.gov/taxtopics/tc751'],
+  ['AAA Auto Club Group: Georgia gas averaged $2.65 a gallon on January 5, 2026.', 'https://newsroom.acg.aaa.com/drivers-see-lower-gas-prices/'],
+  ['AAA Auto Club Group: Georgia gas averaged $3.81 a gallon on August 24, 2026.', 'https://newsroom.acg.aaa.com/pump-pain-persists/'],
+  ['Davis Polk: at least 545 publicly traded companies were subject to Portland’s pay ratio surtax.', 'https://www.davispolk.com/index%2Ephp/insights/client-update/pay-ratio-rule-leads-local-tax-increases']
+];
+function money(n){ var r=Math.round(n); return (r<0?'-$':'$')+Math.abs(r).toLocaleString('en-US'); }
+function bar(n){ var s=''; for(var i=0;i<10;i++) s+= i<n?'■':'□'; return s; }
+function clamp(n){ return Math.max(0,Math.min(10,n)); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function src(nums){ return '<div class="src">src '+nums.map(function(n){return '<button data-src="'+n+'" aria-label="Source '+n+'">['+n+']</button>';}).join('')+'</div>'; }
+
+function events(w){
+  var lost = Math.round(8*4.33*w.wage*0.85);
+  return [
+    { img:'car', alt:'A car smoking from the hood', title:"Your car won't start.", text:'The shop says $550. Your next shift is tomorrow at 6 a.m.', think:'Not today. Please not today.', src:[5],
+      opts:[
+        { id:'cash', label:'Pay cash', cost:550, need:550, ds:0, df:0, tag:'-$550', stamp:'PAID', note:'Fixed. Your savings took the hit, but you made your shift.' },
+        { id:'card', label:'Put it on a credit card', cost:0, debt:550, ds:1, df:-1, tag:'+$550 debt', stamp:'ON CREDIT', note:'The car runs. Now a balance with interest follows you around.' },
+        { id:'bus', label:'Skip it, take the bus', cost:16*w.wage, ds:2, df:0, tag:'miss 2 shifts, -'+money(16*w.wage).slice(1), stamp:'LOST PAY', note:'Two missed shifts before you figured out the bus routes.' }
+      ] },
+    { img:'gas', alt:'A gas pump showing $3.81 a gallon', title:'Gas jumped again.', text:'Georgia gas went from $2.65 a gallon in January to $3.81 in August. Your two tanks now cost about $35 more.', think:'Every time I fill up, it is more.', src:[20,21],
+      opts:[
+        { id:'pay', label:'Just pay it', cost:35, ds:0, df:0, tag:'-$35', stamp:'PAID', note:'Paid. Something else will have to give.' },
+        { id:'shift', label:'Pick up an extra shift', cost:35-8*w.wage, ds:2, df:0, tag:'+'+money(8*w.wage-35).slice(1)+' net', stamp:'OVERTIME', note:'Extra money, less sleep.' },
+        { id:'skip', label:'Drive less, skip visiting family', cost:0, ds:1, df:0, tag:'$0', stamp:'SKIPPED', note:'You saved the gas. You missed Sunday dinner.', missed:'Sunday dinner with family' }
+      ] },
+    { img:'clinic', alt:'An urgent care clinic', title:'You wake up sick.', text:'Sore throat, fever. An urgent care visit averages about $171.', think:'I can probably push through it.', src:[16],
+      opts:[
+        { id:'go', label:'Go to urgent care', cost:171, need:171, ds:-1, df:0, tag:'-$171', stamp:'PAID', note:'Antibiotics, two days off, back on your feet.' },
+        { id:'card', label:'Go, and put it on a card', cost:0, debt:171, ds:0, df:0, tag:'+$171 debt', stamp:'ON CREDIT', note:'You feel better. The card balance does not.' },
+        { id:'push', label:'Push through it', cost:8*w.wage, ds:2, df:0, tag:'miss a shift, -'+money(8*w.wage).slice(1), stamp:'SICK', note:'It got worse and you missed a shift anyway.', missed:'A doctor visit' }
+      ] },
+    { img:'phone', alt:'A phone with a text from Mom asking for $200', title:'Mom texts you.', text:'She is $200 short on the light bill this month.', think:'She would do it for me.', src:[],
+      opts:[
+        { id:'all', label:'Send her $200', cost:200, need:200, ds:-1, df:0, tag:'-$200', stamp:'SENT', note:'Her lights stay on.' },
+        { id:'half', label:'Send $100, all you can spare', cost:100, need:100, ds:0, df:0, tag:'-$100', stamp:'SENT', note:'Half is what you could do.' },
+        { id:'no', label:"Tell her you can't this time", cost:0, ds:2, df:0, tag:'$0', stamp:'SORRY', note:'You meant it when you said sorry.', missed:'Helping family' }
+      ] },
+    { img:'school', alt:'Athens Tech with a signups banner', title:'Athens Tech opened spring signups.', text:'HOPE covers tuition. But class means dropping 8 hours of shifts a week, about '+money(lost)+' less take-home a month, '+money(lost*4)+' over the semester.', think:'This could change things.', src:[13],
+      opts:[
+        { id:'enroll', label:'Enroll this spring', cost:lost, need:lost*4, ds:1, df:4, tag:'need '+money(lost*4), stamp:'ENROLLED', note:'You are enrolled. Your future just got wider.', recurring:{ label:'Class hours (fewer shifts)', amt:lost } },
+        { id:'wait', label:'Wait until next year', cost:0, ds:1, df:-1, tag:'$0', stamp:'NOT YET', note:'Maybe next year. That is what you said last year too.', missed:'The class at Athens Tech' }
+      ] },
+    { img:'rent', alt:'An apartment building with a rent increase notice', title:'Your lease is up.', text:'The new lease is $47 more a month, about a 4% increase.', think:'Where else would I even go?', src:[15],
+      opts:[
+        { id:'sign', label:'Sign the new lease', cost:47, ds:1, df:0, tag:'+$47 a month', stamp:'SIGNED', note:'Rent goes up. Your paycheck does not.', recurring:{ label:'Rent increase', amt:47 } },
+        { id:'look', label:'Look for something cheaper first', cost:47, ds:2, df:0, tag:'+$47 a month', stamp:'SIGNED', note:'Two weeks of searching. Everything near work costs more. You sign anyway.', recurring:{ label:'Rent increase', amt:47 } }
+      ] },
+    { img:'bill', alt:'A $400 bill', title:'A surprise $400 bill.', text:'Nationally, 63% of adults could cover a $400 emergency with cash. Can you?', think:'Of course it is this month.', src:[17],
+      opts:[
+        { id:'cash', label:'Pay it in cash', cost:400, need:400, ds:0, df:0, tag:'-$400', stamp:'PAID', note:'Handled. That was most of your cushion.' },
+        { id:'card', label:'Put it on a credit card', cost:0, debt:400, ds:1, df:-1, tag:'+$400 debt', stamp:'ON CREDIT', note:'Another balance on the card.' },
+        { id:'borrow', label:'Borrow it from a friend', cost:0, debt:400, ds:2, df:0, tag:'+$400 owed', stamp:'BORROWED', note:'Your friend said it was fine. It does not feel fine.' }
+      ] },
+    { img:'gifts', alt:'Wrapped holiday gifts', title:'The holidays are here.', text:'Your family wants you home. A bus ticket and gifts would be about $250.', think:'I have not been home all year.', src:[],
+      opts:[
+        { id:'home', label:'Go home with gifts', cost:250, need:250, ds:-2, df:0, tag:'-$250', stamp:'HOME', note:'You made it home. Worth every dollar.' },
+        { id:'mail', label:'Mail small gifts instead', cost:80, need:80, ds:0, df:0, tag:'-$80', stamp:'MAILED', note:'You watched them open the gifts over video.' },
+        { id:'work', label:'Work the holiday shift', cost:-8*w.wage, ds:2, df:0, tag:'+'+money(8*w.wage).slice(1), stamp:'WORKING', note:'Holiday pay. An empty apartment.', missed:'Holidays with family' }
+      ] }
+  ];
+}
+var COUNTERS = [
+  { q:'"Home Depot is going to leave Georgia!"', pts:[
+      'The cap covers businesses operating in Georgia. A store has to be where its customers are, and Georgia’s customers are not moving.',
+      'Portland, Oregon has charged extra since 2017 when a company’s CEO earns 100 times its median worker or more. At least 545 public companies were subject to it, and they kept doing business there.',
+      'San Francisco passed its own version in 2020. It brings in about $100 million a year.'], verdict:'NOT LIKELY', src:[9,22,10] },
+  { q:'"Prices will skyrocket!"', pts:[
+      'When McDonald’s restaurants had to raise wages, they did raise prices, but by about 2% for a 10% wage increase.',
+      'Home Depot earned $14.2 billion in fiscal 2025. When it raised starting pay to $15 in 2023, that cost $1 billion and the company kept growing.'], verdict:'SMALL EFFECT', src:[11,12,7] },
+  { q:'"They’ll just replace you with machines!"', pts:[
+      'The same McDonald’s study found no link between higher minimum wages and adding touch-screen ordering.',
+      'Home Depot itself said its 2023 raise would help it attract and keep the workers it needs to serve customers.'], verdict:'NOT WHAT HAPPENED', src:[11,7] },
+  { q:'"Top executives will quit!"', pts:[
+      'In 1965, CEOs earned about 21 times a typical worker. Companies still found leaders.',
+      'At 100 to 1, Home Depot’s CEO would still earn about $4.58 million a year in this world. That is still one of the best-paid jobs anywhere.'], verdict:'STILL WELL PAID', src:[8] }
+];
+
+// ---------- state ----------
+var store = { get:function(k){ try{ return JSON.parse(localStorage.getItem('pc427:'+k)); }catch(e){ return null; } }, set:function(k,v){ try{ localStorage.setItem('pc427:'+k, JSON.stringify(v)); }catch(e){} } };
+var S = { screen:'title', char:'m', world:'today', muted: !!store.get('muted'), results: store.get('results') || {}, srcHl:null, back:null };
+var app = document.getElementById('app');
+var timers = [];
+function clearTimers(){ timers.forEach(function(t){ clearTimeout(t); clearInterval(t); }); timers=[]; }
+
+// ---------- sound ----------
+var ac = null;
+function audio(){ if(S.muted) return null; try{ if(!ac){ var A=window.AudioContext||window.webkitAudioContext; if(!A) return null; ac=new A(); } if(ac.state==='suspended') ac.resume(); return ac; }catch(e){ return null; } }
+function tone(f,d,type,vol,at,slide){ var a=audio(); if(!a) return; var t=a.currentTime+(at||0); var o=a.createOscillator(), g=a.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(f,t); if(slide) o.frequency.exponentialRampToValueAtTime(slide,t+d); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol||0.1,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+d); o.connect(g); g.connect(a.destination); o.start(t); o.stop(t+d+0.02); }
+function noise(dur,f1,f2,vol){ var a=audio(); if(!a) return; try{ var len=Math.floor(a.sampleRate*dur), b=a.createBuffer(1,len,a.sampleRate), d=b.getChannelData(0); for(var i=0;i<len;i++) d[i]=(Math.random()*2-1)*(Math.random()<0.3?1:0.3); var s=a.createBufferSource(); s.buffer=b; var bp=a.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.9; var t=a.currentTime; bp.frequency.setValueAtTime(f1,t); bp.frequency.exponentialRampToValueAtTime(f2,t+dur*0.9); var g=a.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); s.connect(bp); bp.connect(g); g.connect(a.destination); s.start(t); s.stop(t+dur); }catch(e){} }
+var sfx = {
+  tick:function(){ tone(2200,0.03,'square',0.03); },
+  kaching:function(){ tone(1318,0.09,'square',0.07); tone(1760,0.35,'triangle',0.12,0.09); tone(2637,0.25,'sine',0.05,0.1); },
+  thunk:function(){ tone(220,0.16,'sine',0.18,0,90); },
+  buzz:function(){ tone(110,0.28,'sawtooth',0.08,0,80); },
+  print:function(){ for(var i=0;i<8;i++) tone(900+(i%2)*120,0.025,'square',0.03,i*0.06); },
+  longprint:function(){ for(var i=0;i<24;i++){ tone(780+(i%3)*90,0.04,'square',0.035,i*0.125); tone(140,0.05,'sawtooth',0.02,i*0.125+0.03); } },
+  spend:function(){ tone(660,0.12,'triangle',0.1,0,330); tone(330,0.2,'triangle',0.08,0.1,160); },
+  coin:function(){ tone(988,0.08,'square',0.06); tone(1319,0.3,'square',0.06,0.08); },
+  up:function(){ [523,659,784,1047].forEach(function(f,i){ tone(f,0.18,'triangle',0.09,i*0.1); }); },
+  down:function(){ [392,349,311,262].forEach(function(f,i){ tone(f,0.26,'triangle',0.09,i*0.16); }); },
+  rip:function(){ noise(0.4,3800,900,0.4); }
+};
+var muteBtn = document.getElementById('mute');
+function drawMute(){ muteBtn.setAttribute('aria-label', S.muted?'Turn sound on':'Turn sound off'); muteBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#222" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z"></path>'+(S.muted?'<path d="M16 9l5 6M21 9l-5 6"></path>':'<path d="M16 9q2 3 0 6"></path><path d="M18.5 6.5q4 5.5 0 11"></path>')+'</svg>'; }
+muteBtn.addEventListener('click', function(){ S.muted=!S.muted; store.set('muted',S.muted); drawMute(); });
+drawMute();
+
+// ---------- game ----------
+function W(){ return WORLDS[S.world]; }
+function other(){ return S.world==='today'?'cap':'today'; }
+function mood(){ return S.g.stress>=7?'frown':S.g.stress>=4?'flat':'relaxed'; }
+function recurringTotal(){ return S.g.recurring.reduce(function(a,r){ return a+r.amt; },0); }
+function newGame(){ S.g = { m:0, cash:0, debt:0, stress:4, future:3, recurring:[], missed:[], choices:[], earned:0, spent:0, last:null }; }
+function startPayday(){
+  var g=S.g, w=W();
+  var extras = recurringTotal();
+  g.cash += w.take - BASE_BILLS - extras; g.earned += w.take; g.spent += BASE_BILLS + extras;
+  S.pay = { counter:0, step:0 };
+  go('payday');
+  var i=0, steps=28;
+  var iv=setInterval(function(){ i++; if(i%3===0) sfx.tick(); S.pay.counter=Math.round(w.take*i/steps); renderPayday(true); if(i>=steps){ clearInterval(iv); sfx.kaching(); var nLines=4+g.recurring.length; for(var k=1;k<=nLines;k++){ (function(k){ timers.push(setTimeout(function(){ sfx.thunk(); S.pay.step=k; renderPayday(); }, 420*k)); })(k); } timers.push(setTimeout(function(){ sfx[S.world==='cap'?'up':'down'](); S.pay.step=99; renderPayday(); }, 420*(nLines+1)+150)); } }, 45);
+  timers.push(iv);
+}
+function choose(o){
+  var g=S.g;
+  if(o.need && g.cash < o.need){ sfx.buzz(); var el=document.querySelector('[data-opt="'+o.id+'"]'); if(el){ el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); } return; }
+  if(o.cost<0) sfx.coin(); else if(o.cost>0||o.debt) sfx.spend(); else sfx.print();
+  timers.push(setTimeout(sfx.print,250));
+  g.cash -= o.cost; if(o.cost>0) g.spent += o.cost; else if(o.cost<0) g.earned += -o.cost;
+  g.debt += (o.debt||0); g.stress = clamp(g.stress+o.ds); g.future = clamp(g.future+o.df);
+  if(o.recurring) g.recurring.push(o.recurring);
+  if(o.missed) g.missed.push(o.missed);
+  g.choices[g.m] = o.id;
+  g.last = o;
+  go('receipt');
+}
+function nextMonth(){
+  var g=S.g;
+  sfx.rip();
+  if(g.m>=7){ finishYear(); return; }
+  g.m++;
+  if(S.world==='cap' && g.m%2===1){ S.counter = COUNTERS[(g.m-1)/2]; go('counter'); }
+  else startPayday();
+}
+function finishYear(){
+  var g=S.g;
+  S.results[S.world] = { char:S.char, cash:g.cash, debt:g.debt, stress:g.stress, future:g.future, missed:g.missed.slice(), choices:g.choices.slice(), earned:g.earned, spent:g.spent };
+  store.set('results', S.results);
+  sfx[S.world==='cap'?'up':'down']();
+  go('yearend');
+}
+
+// ---------- rendering ----------
+function go(screen){ if(screen!=='payday') clearTimers(); S.screen=screen; render(); window.scrollTo(0,0); var h=app.querySelector('h1,h2'); if(h){ h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); } }
+function hud(){
+  var g=S.g, w=W(), ow=WORLDS[other()];
+  return '<div class="wagebar"><span>YOUR WAGE $'+w.wage.toFixed(2)+'/hr</span><span>OTHER GEORGIA $'+ow.wage.toFixed(2)+'/hr</span></div>'+
+   '<div class="stats"><div class="stat"><span>CASH</span><b>'+money(g.cash)+'</b></div><div class="stat"><span>DEBT</span><b>'+money(g.debt)+'</b></div><div class="stat"><span>STRESS</span><span class="bar" aria-label="'+g.stress+' out of 10">'+bar(g.stress)+'</span></div><div class="stat"><span>FUTURE</span><span class="bar" aria-label="'+g.future+' out of 10">'+bar(g.future)+'</span></div></div>';
+}
+var R = {};
+R.title = function(){
+  var p=S.printed;
+  return '<div class="printer'+(p==='printing'?' busy':'')+'"><div style="display:flex;justify-content:space-between;align-items:center"><span>427÷1 · RECEIPT PRINTER</span><span style="display:flex;align-items:center;gap:8px">'+(p==='printing'?'PRINTING':p==='done'?'DONE':'READY')+' <span class="led'+(p==='printing'?' blink':'')+'" style="background:'+(p==='printing'?'#ff8a80':'#c6f25a')+'"></span></span></div><div class="slot"></div></div>'+
+   (!p ? '<div style="display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:40px;max-width:460px"><h1 class="sr">427÷1</h1><p class="chip" style="font-size:16px;line-height:1.6">How much more does <b style="color:#c6f25a">Home Depot’s CEO</b> make than the people working its aisles?</p><button class="btn ghost" id="print" style="background:#fbfaf8;border-width:3px;font-size:20px;max-width:320px">[ PRESS TO PRINT ]</button><p class="chip" style="font-size:12px;width:auto">Turn your sound on</p></div>'
+   : '<div class="feedwrap"><div class="paper feed" style="max-width:none"><p class="small" style="text-align:center">'+new Date().toLocaleDateString('en-US',{month:'2-digit',day:'2-digit',year:'numeric'})+' · ATHENS, GA</p><h1 style="text-align:center;font-size:clamp(56px,16vw,84px);line-height:1">427÷1</h1><div style="border:3px solid #222;padding:10px;text-align:center;display:flex;flex-direction:column;gap:2px"><span style="font-size:26px;font-weight:700;letter-spacing:1px">HOME DEPOT</span><span class="small" style="letter-spacing:2px;color:#222">PAY BREAKDOWN · FISCAL 2025</span></div><div class="row"><span>CEO total pay</span><span>$16,191,127</span></div><div class="row"><span>Median worker</span><span>$37,881</span></div><div class="row"><span>Starting pay</span><span>$15.00/hr</span></div><div class="eq"></div><div class="row big ratio" style="background:#222;color:#fbfaf8;padding:8px 10px"><span>CEO ÷ WORKER</span><span>427 : 1</span></div><div class="rise" style="display:flex;flex-direction:column;gap:10px"><button class="btn" data-go="about">[ START ]</button><div style="display:flex;justify-content:space-between"><button class="link" data-go="sources">View sources</button><button class="link" id="reprint">Reprint</button></div></div><p class="small" style="text-align:center;letter-spacing:1px">A CLASS PROJECT, NOT AFFILIATED WITH HOME DEPOT</p>'+src([6,7])+'</div></div>');
+};
+R.about = function(){
+  return '<div class="paper narrow"><p class="kicker">427÷1 · WHAT’S THIS ABOUT</p><h2>How far apart should the top and bottom be?</h2><div class="eq"></div><div class="row"><span>1965 · CEO vs. typical worker</span><b>21 : 1</b></div><div class="row"><span>2025 · CEO vs. typical worker</span><b class="neg">325 : 1</b></div><div class="eq"></div><p class="body">Public companies now have to report how their CEO’s pay compares to their typical worker’s. Since 2017, Portland, Oregon has charged extra tax to companies whose CEO earns 100 times their typical worker or more.</p><div style="border:2px solid #222;padding:14px;display:flex;flex-direction:column;gap:6px"><p class="kicker" style="color:#222">THE PROPOSAL</p><p style="font-size:16px;line-height:1.5;font-weight:700">Businesses in Georgia must limit the pay of their highest paid employees to no more than 100 times the pay of the lowest full-time employee of that company.</p></div><button class="btn" data-go="position">[ NEXT ]</button>'+src([8,9])+'</div>';
+};
+R.position = function(){
+  return '<div class="paper narrow"><p class="kicker">427÷1 · MY POSITION</p><div style="display:flex;gap:12px;flex-wrap:wrap"><span style="border:3px solid #222;padding:8px 14px;font-size:24px;font-weight:700">[X] FOR</span><span style="border:3px solid #bbb;color:#777;padding:8px 14px;font-size:24px">[ ] AGAINST</span></div><div class="eq"></div><p style="font-size:17px;line-height:1.7">Georgia should do this because we want to grow as a state. Raising wages builds a stronger financial base for families, eases the burden that keeps people from moving forward socially and educationally, and on top of that, it’s just unfair.</p><div class="eq"></div><p class="body" style="color:#444;font-size:14px">You’ll live one year as a full-time Home Depot worker in Athens. Then you’ll live the same year again in a Georgia where the cap became law three years ago. Same person, same bills, same choices.</p><button class="btn" data-go="numbers">[ NEXT ]</button></div>';
+};
+R.numbers = function(){
+  return '<div class="paper narrow"><p class="kicker">427÷1 · HOME DEPOT, FISCAL 2025</p><p class="body" style="font-size:14px">Headquartered in the Atlanta area. More than 400,000 workers.</p><div class="eq"></div><div class="row"><span>CEO total pay</span><span>$16,191,127</span></div><div class="row"><span>Median worker</span><span>$37,881</span></div><div class="row big"><span>CEO ÷ median</span><span>427 : 1</span></div><div class="eq"></div><div class="row"><span>Starting pay</span><span>$15.00/hr</span></div><div class="row"><span>× 40 hrs × 52 weeks</span><span>$31,200</span></div><div class="row big neg"><span>CEO ÷ lowest</span><span>519 : 1</span></div><div class="eq"></div><p class="body">The CEO earns a starting worker’s whole year of pay in about <b>half a workday</b>.</p><div class="row" style="background:#222;color:#fbfaf8;padding:10px 12px"><span>Allowed under the cap</span><span>100 : 1</span></div><button class="btn" data-go="character">[ NEXT ]</button>'+src([6,7])+'</div>';
+};
+R.character = function(){
+  function card(k){ var c=CHARS[k]; return '<button class="pick'+(S.char===k?' on':'')+'" data-char="'+k+'" aria-pressed="'+(S.char===k)+'"><img src="'+c.img.flat+'" width="64" height="96" alt="" style="image-rendering:pixelated"><span class="t">'+c.name+', 25</span><span style="line-height:1.5">Lives alone in Athens. Drives a 2014 sedan. Sends money home when '+c.pron+' can.</span></button>'; }
+  return '<div class="paper"><p class="kicker">427÷1 · WHO ARE YOU?</p><h2>Pick your character</h2><div class="grid2">'+card('m')+card('f')+'</div><div class="eq"></div><div class="row"><span>Job</span><span>Full-time associate, Home Depot</span></div><div class="row"><span>Hours</span><span>40 a week</span></div><p class="small">Both characters earn the same pay and face the same bills and choices.</p><button class="btn" data-go="world">[ NEXT ]</button></div>';
+};
+R.world = function(){
+  function card(k){ var w=WORLDS[k]; var done=S.results[k]?' · PLAYED':''; return '<button class="pick'+(S.world===k?' on':'')+'" data-world="'+k+'" aria-pressed="'+(S.world===k)+'"><span class="small" style="color:inherit;letter-spacing:2px">WORLD '+(k==='today'?'A':'B')+done+'</span><span class="t" style="font-size:24px">'+w.name+'</span><span class="row" style="font-size:14px"><span>Your pay</span><span>$'+w.wage.toFixed(2)+'/hr</span></span><span class="row" style="font-size:14px"><span>CEO pay</span><span>'+w.ceo+'</span></span><span class="row" style="font-size:14px"><span>Ratio</span><span>'+w.ratio+'</span></span><span style="line-height:1.5">'+(k==='today'?'Georgia as it is right now.':'Three years after the law passed.')+'</span></button>'; }
+  var both = S.results.today && S.results.cap;
+  return '<div class="paper"><p class="kicker">427÷1 · PICK A WORLD</p><h2>Which Georgia?</h2><div class="grid2">'+card('today')+card('cap')+'</div><button class="btn" id="begin">[ START THE YEAR ]</button>'+(both?'<button class="btn ghost" data-go="compare">See both lives side by side</button>':'<p class="small">Play both. The side-by-side comparison unlocks after you finish both years.</p>')+'<p class="small">$22/hr is this game’s assumption for three years after the law. See sources.</p></div>';
+};
+R.capintro = function(){
+  return '<div class="headline"><p class="kicker" style="color:#c6f25a">THE PAY CAP · THREE YEARS LATER</p><p class="q">The law passed. Here’s what changed at Home Depot.</p></div><div class="paper"><div class="row"><span>CEO pay</span><span>$16.2M → $4.58M</span></div><div class="row"><span>Lowest full-time pay</span><span>$15 → $22/hr</span></div><div class="row big"><span>Ratio</span><span>100 : 1</span></div><div class="eq"></div><p class="body">Under the cap, executives can only get a raise if the lowest-paid workers get one too. This game assumes Home Depot met in the middle: top pay came down, and the floor rose to $22 an hour.</p><p class="small">That number is the game’s assumption, not a prediction. For scale: Home Depot earned $14.2 billion in fiscal 2025, and its 2023 raise to $15 cost $1 billion.</p><button class="btn" id="capgo">[ START THE YEAR ]</button>'+src([12,7])+'</div>';
+};
+R.payday = function(){
+  var g=S.g, w=W(), ow=WORLDS[other()], p=S.pay;
+  var n=Math.round(w.take/200), shown=Math.round(n*Math.min(1,p.counter/w.take)), bills='';
+  for(var i=0;i<shown;i++){ var col=i%5,row=Math.floor(i/5); bills+='<div class="bill" style="left:'+(col*64+(row%2)*28)+'px;bottom:'+(row*24)+'px;--r:'+((i*37)%24-12)+'deg" aria-hidden="true">$</div>'; }
+  var lines=BILLS.map(function(b){ return [b[0]+' ['+b[2]+']', -b[1]]; }).concat(g.recurring.map(function(r){ return [r.label, -r.amt]; }));
+  var shownLines=lines.slice(0,Math.min(lines.length,p.step)).map(function(l){ return '<div class="row line"><span>'+esc(l[0])+'</span><span class="neg">'+money(l[1])+'</span></div>'; }).join('');
+  var extras=recurringTotal(), myLeft=w.take-BASE_BILLS-extras, otherLeft=ow.take-BASE_BILLS-extras, max=Math.max(myLeft,otherLeft,1), diff=otherLeft-myLeft;
+  var done=p.step>=99;
+  return hud()+'<div class="paper" style="max-width:600px"><div class="row" style="font-size:13px;letter-spacing:1px"><span>PAYDAY · MONTH '+(g.m+1)+' OF 8</span><span>'+w.label+'</span></div><h2 class="sr">Payday, month '+(g.m+1)+'</h2><div class="pile">'+bills+'<div class="counter"><p class="small" style="color:#222">TAKE-HOME</p><p class="n">'+money(p.counter)+'</p><p class="small" style="color:#222">'+n+' bills · other Georgia: '+Math.round(ow.take/200)+'</p></div></div>'+shownLines+
+   (done?'<div class="row big line" style="border-top:2px dashed #888;padding-top:10px"><span>LEFT THIS MONTH</span><span>'+money(myLeft)+'</span></div><div class="line" style="display:flex;flex-direction:column;gap:6px"><span class="small" style="color:#222">THIS GEORGIA · '+money(myLeft)+'</span><div class="track"><div class="fill" style="width:'+Math.max(2,Math.round(100*myLeft/max))+'%;background:#222"></div></div><span class="small" style="color:#222">THE OTHER GEORGIA · '+money(otherLeft)+'</span><div class="track"><div class="fill" style="width:'+Math.max(2,Math.round(100*otherLeft/max))+'%;background:#1d7a4a"></div></div></div><div class="pulse" style="background:'+(diff>0?'#b3261e':'#1d7a4a')+'">'+(diff>0?'The cap would leave you '+money(diff)+' more this month':'Today you would have '+money(-diff)+' less this month')+'</div>':'')+
+   '<button class="btn" id="paynext">'+(done?'[ SEE WHAT HAPPENS ]':'[ SKIP ]')+'</button><p class="small">Take-home is estimated after Social Security, Medicare, federal and Georgia income tax.</p>'+src([1,2,3,4,18,19,14])+'</div>';
+};
+function renderPayday(){ if(S.screen!=='payday') return; app.innerHTML=R.payday(); bind(); }
+R.scene = function(){
+  var g=S.g, w=W(), ev=events(w)[g.m], c=CHARS[S.char];
+  var opts=ev.opts.map(function(o){ var ok=!o.need||g.cash>=o.need; return ok?'<button class="opt" data-opt="'+o.id+'"><span>[ ] '+esc(o.label)+'</span><span>'+esc(o.tag)+'</span></button>':'<button class="opt locked" data-opt="'+o.id+'" aria-disabled="true"><span>[x] '+esc(o.label)+'</span><span class="why">NOT ENOUGH MONEY</span></button>'; }).join('');
+  return hud()+'<div class="paper" style="max-width:600px;padding:0;gap:0"><div class="row" style="font-size:13px;letter-spacing:1px;padding:16px 20px 0"><span>MONTH '+(g.m+1)+' OF 8</span><span>'+w.label+'</span></div><div class="scene"><img class="bg" src="assets/'+ev.img+'.png" alt="'+esc(ev.alt)+'"><img class="who" src="'+c.img[mood()]+'" alt="'+c.name+', looking '+({relaxed:'relaxed',flat:'tired',frown:'stressed'})[mood()]+'"><div class="thought">'+esc(ev.think)+'</div></div><div style="padding:0 20px 22px;display:flex;flex-direction:column;gap:10px"><div class="eq"></div><h2 style="font-size:20px">'+esc(ev.title)+'</h2><p class="body" style="font-size:14px">'+esc(ev.text)+'</p>'+opts+(ev.src.length?src(ev.src):'<p class="small" style="align-self:flex-end">game scenario</p>')+'</div></div>';
+};
+R.receipt = function(){
+  var g=S.g, w=W(), ow=WORLDS[other()], o=g.last, extras=recurringTotal();
+  var spent=o.cost>0?o.cost:0, fly='';
+  for(var i=0;i<Math.min(8,Math.round(spent/70));i++) fly+='<div class="fly" style="left:'+(100+i*30)+'px;top:140px;--dx:'+((i*53)%160-80)+'px;--r:'+((i*41)%60-30)+'deg;animation-delay:'+(0.6+i*0.07)+'s" aria-hidden="true">$</div>';
+  var red = spent>0||o.debt;
+  var gap = ow.take-w.take;
+  return hud()+'<div class="paper narrow" style="max-width:520px"><div class="row" style="font-size:13px;letter-spacing:1px"><span>RECEIPT · MONTH '+(g.m+1)+'</span><span>'+w.label+'</span></div><h2 class="sr">Receipt for month '+(g.m+1)+'</h2><div class="eq"></div><div class="row"><span>Paycheck (take-home, est.)</span><span>'+money(w.take)+'</span></div><div class="row"><span>Rent, food, power, gas</span><span>-'+money(BASE_BILLS).slice(1)+'</span></div>'+(extras?'<div class="row"><span>Other monthly costs</span><span>-'+money(extras).slice(1)+'</span></div>':'')+'<div class="row" style="font-weight:700"><span>'+esc(o.label)+'</span><span>'+esc(o.tag)+'</span></div><div class="eq"></div><div class="row big"><span>CASH</span><span'+(g.cash<500?' class="neg"':'')+'>'+money(g.cash)+'</span></div><div class="row"><span>Debt</span><span>'+money(g.debt)+'</span></div><div class="row"><span>Stress</span><span>'+bar(g.stress)+'</span></div><div class="row"><span>Future</span><span>'+bar(g.future)+'</span></div><div class="eq"></div><p class="body" style="font-size:14px">'+esc(o.note)+'</p><div class="chip" style="text-align:left">'+(S.world==='today'?'In the other Georgia, this month’s paycheck was '+money(gap)+' bigger.':'In today’s Georgia, this month’s paycheck would be '+money(-gap)+' smaller.')+'</div><button class="btn" id="next">'+(g.m>=7?'[ SEE HOW THE YEAR WENT ]':'[ TEAR OFF · NEXT MONTH ]')+'</button><div class="stamp" style="color:'+(red?'#b3261e':'#1d7a4a')+'">'+esc(o.stamp)+'</div>'+fly+'</div>';
+};
+R.counter = function(){
+  var c=S.counter;
+  return '<div class="headline"><p class="kicker" style="color:#c6f25a">OVERHEARD IN THE BREAK ROOM</p><h2 class="q">'+esc(c.q)+'</h2></div><div class="paper"><p class="kicker">HERE’S THE THING</p>'+c.pts.map(function(p,i){ return '<div class="point"><span>0'+(i+1)+'</span><span>'+esc(p)+'</span></div>'; }).join('')+'<div class="eq"></div><div class="row"><span>Verdict</span><b class="neg">'+c.verdict+'</b></div><button class="btn" id="backwork">[ BACK TO WORK ]</button>'+src(c.src)+'</div>';
+};
+R.yearend = function(){
+  var r=S.results[S.world], w=W(), c=CHARS[r.char], both=S.results.today&&S.results.cap;
+  return '<div class="paper narrow"><p class="kicker" style="text-align:center">YEAR-END RECEIPT · '+w.label+'</p><h2 style="text-align:center">'+c.name.toUpperCase()+', 25</h2><div class="eq"></div><div class="row"><span>Total earned</span><span>'+money(r.earned)+'</span></div><div class="row"><span>Total spent</span><span>-'+money(r.spent).slice(1)+'</span></div><div class="row big"><span>Cash left</span><span'+(r.cash<500?' class="neg"':'')+'>'+money(r.cash)+'</span></div><div class="row"><span>Debt</span><span'+(r.debt?' class="neg"':'')+'>'+money(r.debt)+'</span></div><div class="row"><span>Stress</span><span>'+bar(r.stress)+'</span></div><div class="row"><span>Future</span><span>'+bar(r.future)+'</span></div><div class="eq"></div><p class="kicker" style="color:#222">WHAT YOU MISSED</p><p class="body" style="font-size:14px">'+(r.missed.length?r.missed.map(function(m){ return 'x '+esc(m); }).join('<br>'):'Nothing this year.')+'</p><div class="eq"></div>'+(both?'<button class="btn" data-go="compare">[ SEE BOTH LIVES SIDE BY SIDE ]</button>':'<p style="font-size:15px;font-weight:700;line-height:1.6">Now live the same year in the other Georgia.</p><button class="btn" id="playother">[ PLAY '+WORLDS[other()].name+' ]</button>')+'<button class="btn ghost" data-go="world">Back to world select</button><p class="small" style="text-align:center;letter-spacing:1px">THANK YOU FOR WORKING · NO REFUNDS</p></div>';
+};
+R.compare = function(){
+  var a=S.results.today, b=S.results.cap;
+  if(!a||!b) return '<div class="paper narrow"><p class="body">Finish both years to unlock this.</p><button class="btn" data-go="world">Back</button></div>';
+  var same = a.choices.join()===b.choices.join() && a.char===b.char;
+  var netA=a.cash-a.debt, netB=b.cash-b.debt, max=Math.max(Math.abs(netA),Math.abs(netB),1);
+  function card(r,name,color){ var net=r.cash-r.debt; return '<div class="paper" style="max-width:none"><p style="font-size:18px;font-weight:700">'+name+'</p><div class="eq"></div><div class="row"><span>Cash</span><span>'+money(r.cash)+'</span></div><div class="row"><span>Debt</span><span>'+money(r.debt)+'</span></div><div class="row"><span>Stress</span><span>'+r.stress+'/10</span></div><div class="row"><span>Future</span><span>'+r.future+'/10</span></div><div class="row"><span>Missed</span><span>'+r.missed.length+'</span></div><div class="track"><div class="fill" style="width:'+Math.max(2,Math.round(100*Math.max(0,net)/max))+'%;background:'+color+'"></div></div></div>'; }
+  return '<p class="chip" style="max-width:680px">427÷1 · '+(same?'SAME PERSON, SAME CHOICES':'YOUR TWO YEARS')+'</p><div class="grid2" style="width:100%;max-width:680px">'+card(a,'TODAY','#222')+card(b,'THE PAY CAP','#1d7a4a')+'</div><div class="pulse" style="background:#1d7a4a;max-width:680px">'+(same?'Same choices. ':'')+money(Math.abs(netB-netA))+' '+(netB>=netA?'better off under the cap':'apart')+' after 8 months.</div>'+
+   '<div class="paper wide"><p class="kicker" style="color:#222">WHY GEORGIA SHOULD CAP TOP PAY AT 100 : 1</p><div class="point"><span>01</span><span>Georgia grows when the people doing the work can afford to live here.</span></div><div class="point"><span>02</span><span>Higher pay at the bottom means savings instead of credit card debt.</span></div><div class="point"><span>03</span><span>With room to breathe, people take the class, help family, and move up.</span></div><div class="point"><span>04</span><span>And 427 to 1 is just unfair.</span></div><div class="eq"></div><p style="font-size:15px;line-height:1.7;font-weight:700">Georgia should do this because we want to grow as a state. Raising wages builds a stronger financial base for families, eases the burden that keeps people from moving forward socially and educationally, and on top of that, it’s just unfair.</p><button class="btn" data-go="sources">[ SEE ALL SOURCES ]</button><button class="btn ghost" id="replay">Play again</button></div>';
+};
+R.sources = function(){
+  return '<div class="paper wide sources"><p class="kicker">427÷1 · SOURCES</p><h2>Sources</h2><div class="eq"></div><ol style="padding-left:28px;margin:0">'+SOURCES.map(function(s,i){ return '<li id="s'+(i+1)+'"'+(S.srcHl===i+1?' class="hl"':'')+'>'+esc(s[0])+' <a href="'+s[1]+'" target="_blank" rel="noopener">Link</a></li>'; }).join('')+'</ol><div class="eq"></div><p class="kicker" style="color:#222">GAME ASSUMPTIONS</p><p class="body" style="font-size:13px">$22 an hour in the Pay Cap world is this game’s assumption for three years after the law, not a prediction. Take-home pay is estimated with 2026 Social Security, Medicare, federal and Georgia income tax for a single filer working 40 hours a week, 52 weeks a year. The game counts only rent, groceries, power, and gas as monthly bills. The mom, holiday, and lost-hours amounts are story choices, not statistics. Credit card interest is not calculated.</p><p class="body" style="font-size:13px">This is a class project for POLS 1101 at the University of Georgia. It is not affiliated with or endorsed by The Home Depot. Characters are fictional.</p><button class="btn" id="srcback">[ BACK ]</button></div>';
+};
+
+function render(){ app.innerHTML = (R[S.screen]||R.title)(); bind(); }
+function bind(){
+  app.querySelectorAll('[data-go]').forEach(function(b){ b.addEventListener('click', function(){ audio(); if(b.dataset.go==='sources'){ S.back=S.screen; S.srcHl=null; } go(b.dataset.go); }); });
+  app.querySelectorAll('[data-src]').forEach(function(b){ b.addEventListener('click', function(){ S.back=S.screen; S.srcHl=+b.dataset.src; S.savedPay = S.screen==='payday'; clearTimers(); S.screen='sources'; render(); var el=document.getElementById('s'+S.srcHl); if(el) el.scrollIntoView({block:'center'}); }); });
+  app.querySelectorAll('[data-char]').forEach(function(b){ b.addEventListener('click', function(){ audio(); S.char=b.dataset.char; render(); }); });
+  app.querySelectorAll('[data-world]').forEach(function(b){ b.addEventListener('click', function(){ audio(); S.world=b.dataset.world; render(); }); });
+  app.querySelectorAll('[data-opt]').forEach(function(b){ b.addEventListener('click', function(){ var ev=events(W())[S.g.m]; var o=ev.opts.filter(function(x){ return x.id===b.dataset.opt; })[0]; choose(o); }); });
+  var el;
+  if((el=document.getElementById('print'))) el.addEventListener('click', function(){ audio(); sfx.longprint(); timers.push(setTimeout(sfx.kaching,2950)); S.printed='printing'; render(); timers.push(setTimeout(function(){ S.printed='done'; if(S.screen==='title'){ var p=document.querySelector('.printer'); if(p){ p.classList.remove('busy'); } } },3000)); });
+  if((el=document.getElementById('reprint'))) el.addEventListener('click', function(){ S.printed=null; render(); timers.push(setTimeout(function(){ var p=document.getElementById('print'); if(p) p.click(); },30)); });
+  if((el=document.getElementById('begin'))) el.addEventListener('click', function(){ audio(); newGame(); if(S.world==='cap') go('capintro'); else startPayday(); });
+  if((el=document.getElementById('capgo'))) el.addEventListener('click', function(){ startPayday(); });
+  if((el=document.getElementById('paynext'))) el.addEventListener('click', function(){ if(S.pay.step<99){ clearTimers(); S.pay.counter=W().take; S.pay.step=99; renderPayday(); } else go('scene'); });
+  if((el=document.getElementById('next'))) el.addEventListener('click', nextMonth);
+  if((el=document.getElementById('backwork'))) el.addEventListener('click', function(){ startPayday(); });
+  if((el=document.getElementById('playother'))) el.addEventListener('click', function(){ S.world=other(); newGame(); if(S.world==='cap') go('capintro'); else startPayday(); });
+  if((el=document.getElementById('replay'))) el.addEventListener('click', function(){ S.results={}; store.set('results',{}); go('character'); });
+  if((el=document.getElementById('srcback'))) el.addEventListener('click', function(){ var b=S.back||'title'; S.back=null; if(b==='payday'){ S.pay.counter=W().take; S.pay.step=99; } go(b); });
+}
+render();
+})();
+</script>
+</body>
+</html>
